@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management Dashboard</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --text: #2c3e50;
+            --border: #bdc3c7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--text);
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        nav {
+            background-color: white;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            border-bottom: 3px solid var(--secondary);
+            background-color: #f8f9fa;
+        }
+        
+        .nav-item.active {
+            border-bottom: 3px solid var(--secondary);
+            font-weight: 600;
+        }
+        
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title span {
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
+        .large-card {
+            grid-column: span 2;
+        }
+        
+        .property-list {
+            margin-top: 1rem;
+        }
+        
+        .property-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .property-name {
+            font-weight: 500;
+        }
+        
+        .property-metric {
+            font-weight: 600;
+        }
+        
+        .property-metric.positive {
+            color: var(--success);
+        }
+        
+        .property-metric.negative {
+            color: var(--danger);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            position: relative;
+        }
+        
+        .chart-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #95a5a6;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 0.8rem;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status.active {
+            background-color: #e8f8f5;
+            color: #27ae60;
+        }
+        
+        .status.pending {
+            background-color: #fef9e7;
+            color: #f39c12;
+        }
+        
+        .status.inactive {
+            background-color: #f8f9fa;
+            color: #7f8c8d;
+        }
+        
+        .status.urgent {
+            background-color: #fdedeb;
+            color: #e74c3c;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+        }
+        
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .section-title {
+            margin: 2rem 0 1rem 0;
+            font-size: 1.4rem;
+            color: var(--dark);
+        }
+        
+        .alerts-container {
+            margin-top: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert.alert-warning {
+            background-color: #fef9e7;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .alert.alert-danger {
+            background-color: #fdedeb;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .alert-warning .alert-icon {
+            background-color: var(--warning);
+        }
+        
+        .alert-danger .alert-icon {
+            background-color: var(--danger);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .large-card {
+                grid-column: span 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Property Management Dashboard</h1>
+        <div class="user-info">
+            <span>Admin</span>
+            <div class="user-icon">A</div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="nav-container">
+            <div class="nav-item active">Dashboard</div>
+            <div class="nav-item">Properties</div>
+            <div class="nav-item">Tenants</div>
+            <div class="nav-item">Finances</div>
+            <div class="nav-item">Maintenance</div>
+            <div class="nav-item">Reports</div>
+            <div class="nav-item">Settings</div>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-title">Portfolio Summary</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Properties</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Units</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">92%</div>
+                        <div class="stat-label">Occupancy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$3.2M</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Financial Overview</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">$28,450</div>
+                        <div class="stat-label">Monthly Income</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$12,230</div>
+                        <div class="stat-label">Monthly Expenses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$16,220</div>
+                        <div class="stat-label">Net Operating Income</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">7.2%</div>
+                        <div class="stat-label">Avg. Cap Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card large-card">
+                <div class="card-title">Monthly Performance <span>View Report</span></div>
+                <div class="chart-container">
+                    <div class="chart-placeholder">Income vs Expenses Chart (Jan - Dec 2025)</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Top Performing Properties <span>View All</span></div>
+                <div class="property-list">
+                    <div class="property-item">
+                        <div class="property-name">123 Main Street</div>
+                        <div class="property-metric positive">8.5% ROI</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-name">456 Park Avenue</div>
+                        <div class="property-metric positive">7.8% ROI</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-name">789 Oak Lane</div>
+                        <div class="property-metric positive">7.3% ROI</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-name">101 Pine Street</div>
+                        <div class="property-metric positive">6.9% ROI</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-name">202 Cedar Road</div>
+                        <div class="property-metric positive">6.4% ROI</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Attention Required <span>View All</span></div>
+                <div class="alerts-container">
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">!</div>
+                        <div>
+                            <strong>5 Leases Expiring</strong> in the next 30 days
+                        </div>
+                    </div>
+                    <div class="alert alert-danger">
+                        <div class="alert-icon">!</div>
+                        <div>
+                            <strong>3 Overdue Payments</strong> totaling $4,200
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">!</div>
+                        <div>
+                            <strong>7 Maintenance Requests</strong> pending assignment
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Recent Activities</h2>
+        
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active">Maintenance (12)</div>
+                <div class="tab">Leases (5)</div>
+                <div class="tab">Payments (8)</div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Property</th>
+                            <th>Issue</th>
+                            <th>Reported</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>MT022</td>
+                            <td>123 Main St, Unit 3</td>
+                            <td>Broken dishwasher</td>
+                            <td>Feb 26, 2025</td>
+                            <td><span class="status pending">Pending</span></td>
+                            <td>Medium</td>
+                            <td><button class="btn btn-outline">Assign</button></td>
+                        </tr>
+                        <tr>
+                            <td>MT021</td>
+                            <td>456 Park Ave, Unit 2B</td>
+                            <td>HVAC not cooling</td>
+                            <td>Feb 25, 2025</td>
+                            <td><span class="status active">In Progress</span></td>
+                            <td>High</td>
+                            <td><button class="btn btn-outline">View</button></td>
+                        </tr>
+                        <tr>
+                            <td>MT020</td>
+                            <td>789 Oak Ln, Unit 101</td>
+                            <td>Leaking faucet</td>
+                            <td>Feb 23, 2025</td>
+                            <td><span class="status active">Scheduled</span></td>
+                            <td>Low</td>
+                            <td><button class="btn btn-outline">View</button></td>
+                        </tr>
+                        <tr>
+                            <td>MT019</td>
+                            <td>101 Pine St, Unit A</td>
+                            <td>Electrical outlet sparking</td>
+                            <td>Feb 22, 2025</td>
+                            <td><span class="status urgent">Urgent</span></td>
+                            <td>High</td>
+                            <td><button class="btn btn-primary">Respond</button></td>
+                        </tr>
+                        <tr>
+                            <td>MT018</td>
+                            <td>123 Main St, Unit 5</td>
+                            <td>Toilet clogged</td>
+                            <td>Feb 21, 2025</td>
+                            <td><span class="status active">In Progress</span></td>
+                            <td>Medium</td>
+                            <td><button class="btn btn-outline">View</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simple functionality to show how tabs would work
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelector('.tab.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelector('.nav-item.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
